@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>나의 홈페이지</title>
+    <script src="./moment.js"></script>
+    <style>
+      div.calendar,
+      div.calendar_title {
+        border: 1px solid green;
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+      }
+
+      div.week.date {
+        border: 1px solid blue;
+        padding: 20px;
+        text-align: center;
+      }
+
+      div.week.date:nth-of-type(7n - 6),
+      div.week.date:nth-of-type(7n) {
+        color: red;
+      }
+
+      div.week.date[textContent="0"] {
+        display: none;
+      }
+      p.mIncrement {
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 class="today"></h1>
+    <p class="startDate"></p>
+    <p class="mIncrement"></p>
+    <p class="startWeek"></p>
+    <div class="calendar_title">
+      <div class="week date">일</div>
+      <div class="week date">월</div>
+      <div class="week date">화</div>
+      <div class="week date">수</div>
+      <div class="week date">목</div>
+      <div class="week date">금</div>
+      <div class="week date">토</div>
+    </div>
+    <div class="calendar"></div>
+  </body>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const todayTitle = document.querySelector("h1.today");
+      const startDate = document.querySelector("p.startDate");
+      const calendarBox = document.querySelector("div.calendar");
+      const mIncrement = document.querySelector("p.mIncrement");
+
+      let monthCount = 1;
+
+      const viewCalendar = async () => {
+        // 월단위는 0 부터 시작
+        const dateObj = { year: 2022, months: monthCount - 1, day: 1 };
+        const mObj = moment(dateObj); // .add(1, "M");
+        console.log(mObj);
+        todayTitle.textContent = mObj.format("YYYY년 MM월 DD일 hh:mm:ss");
+        startDate.textContent = mObj
+          .startOf("month")
+          .format("YYYY년 MM월 DD일 hh:mm:ss");
+
+        const curYear = mObj.year();
+        const curMonth = mObj.month();
+        const startWeekDayNum = mObj.startOf("month").day();
+
+        const dayList = Array(42).fill("");
+        const calList = dayList.map((_, index) => {
+          const div = document.createElement("div");
+          div.classList.add("week");
+          div.classList.add("date");
+          const dateNum = (div.textContent = index - startWeekDayNum + 1);
+          div.textContent =
+            index >= startWeekDayNum &&
+            moment({
+              year: curYear,
+              month: curMonth,
+              day: dateNum,
+            }).isValid()
+              ? dateNum
+              : "";
+
+          return div;
+        });
+        calendarBox.textContent = "";
+        if (!calList[calList.length - 7].textContent) {
+          calList.splice(calList.length - 7);
+        }
+        calendarBox.append(...calList);
+        mIncrement.textContent = `${monthCount} 월`;
+      };
+
+      mIncrement?.addEventListener("click", () => {
+        if (++monthCount > 12) monthCount = 1;
+        viewCalendar();
+      });
+      viewCalendar();
+    });
+  </script>
+</html>
